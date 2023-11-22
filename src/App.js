@@ -20,7 +20,7 @@ function Address(){
   return (
     <>
 <Name/> 
-<Suspense fallback={<h2>Loading...</h2>}>
+<Suspense fallback={<h2>Loading a data...</h2>}>
 <Name/>
 <Address/>
 </Suspense>
