@@ -19,7 +19,7 @@ export default function Address() {
     }
   return (
     <>
-    <h1>Address Title Show Here</h1>
+    <h1>Address Title</h1>
     <h3>{Address}</h3>
     </>
   )
