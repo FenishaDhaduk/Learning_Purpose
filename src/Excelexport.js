@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import * as FileSaver from "file-saver";
 import XLSX from "sheetjs-style";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -17,6 +17,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 // Finally, FileSaver.saveAs is used to trigger the download of the Blob as a file.
 // It takes the Blob (data) and a filename (fileName + fileextentions) for the downloaded file.
 
+
+
 function Excelexport() {
   const [userData, setUserData] = useState([]);
   const [currentData, setCurrentData] = useState({
@@ -29,7 +31,18 @@ function Excelexport() {
   const filetype =
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
   const fileextentions = ".xlsx";
-  const fileName="Excel Export"
+  const fileName = "Excel Export";
+
+  useEffect(() => {
+    const storedData = localStorage.getItem("userData");
+    if (storedData) {
+      setUserData(JSON.parse(storedData));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("userData", JSON.stringify(userData));
+  }, [userData]);
 
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(userData);
@@ -37,6 +50,7 @@ function Excelexport() {
     const excelbuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const data = new Blob([excelbuffer], { type: filetype });
     FileSaver.saveAs(data, fileName + fileextentions);
+    setUserData(userData);
   };
 
   const handleInputChange = (event) => {
@@ -97,7 +111,7 @@ function Excelexport() {
               onChange={handleInputChange}
             />
           </div>
-          <button 
+          <button
             type="button"
             className="btn btn-primary"
             onClick={handleAddData}
@@ -105,12 +119,12 @@ function Excelexport() {
             Add Data
           </button>
           <button
-          style={{marginLeft:"5px"}}
+            style={{ marginLeft: "5px" }}
             type="button"
-            className="btn btn-primary"
+            className="btn btn-success"
             onClick={exportToExcel}
           >
-            Export to Excel
+            ExportData to Excel
           </button>
         </form>
       </div>
