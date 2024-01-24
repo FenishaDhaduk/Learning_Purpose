@@ -25,7 +25,7 @@ function App() {
 ]
   return (
     <div className="App">
-     <Excelexport excelData={ExcelData} fileName={"Excel Export"}/>
+     <Excelexport/>
     </div>
   );
 }

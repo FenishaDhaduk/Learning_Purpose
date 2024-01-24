@@ -17,7 +17,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 // Finally, FileSaver.saveAs is used to trigger the download of the Blob as a file.
 // It takes the Blob (data) and a filename (fileName + fileextentions) for the downloaded file.
 
-function Excelexport({ fileName }) {
+function Excelexport() {
   const [userData, setUserData] = useState([]);
   const [currentData, setCurrentData] = useState({
     FirstName: "",
@@ -29,6 +29,7 @@ function Excelexport({ fileName }) {
   const filetype =
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
   const fileextentions = ".xlsx";
+  const fileName="Excel Export"
 
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(userData);
