@@ -9,7 +9,7 @@ const io = new Server(server);
 
 app.use(express.json());
 
-mongoose.connect('mongodb+srv://Atlas:Atlas1234@cluster0.eiqjjzp.mongodb.net/');
+mongoose.connect('mongodb+srv://Atlas:Atlas1234@cluster0.eiqjjzp.mongodb.net/',{dbName:"StoreNotification"});
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 db.once('open', () => console.log('Connected to MongoDB'));
@@ -33,7 +33,6 @@ app.post('/notification', async (req, res) => {
         const { message } = req.body;
         const notification = new Notification({ message });
         await notification.save();
-console.log(notification)
         // Emit the new notification to all connected clients
         io.emit('newNotification', notification);
 
@@ -44,9 +43,23 @@ console.log(notification)
     }
 });
 
+app.get('/notifications', async (req, res) => {
+    try {
+        const notifications = await Notification.find().exec();
+        const totalCount = await Notification.countDocuments().exec();
+        io.emit('fetchnotification', notifications);
+        res.status(200).json({ success: true, notifications,totalCount });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+
 const PORT = 3001;
 server.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
 });
+
+
 
 
