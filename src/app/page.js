@@ -1,4 +1,3 @@
-// Client-side code (React component)
 "use client";
 import { useEffect, useState } from "react";
 import io from "socket.io-client";
@@ -6,20 +5,40 @@ import io from "socket.io-client";
 const socket = io("http://172.16.17.121:3001");
 
 export default function Home() {
-  const [notification, setNotification] = useState("");
+  const [notification, setNotification] = useState([]);
 
   useEffect(() => {
     socket.on("newNotification", (data) => {
       console.log("New notification:", data);
-      setNotification(data);
-      // Handle the received notification as needed
+    fetchNotifications();
+
     });
 
-    // Cleanup on unmount
+    fetchNotifications();
+
     return () => {
       socket.off("newNotification");
     };
   }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await fetch("http://localhost:3001/notifications", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+      console.log("Fetched notifications:", data?.notifications);
+      setNotification(data?.notifications);
+    } catch (error) {
+      console.log(error, "error");
+    }
+  };
+
+  console.log(notification, "897465132");
 
   const sendNotification = async (event) => {
     event.preventDefault();
@@ -34,15 +53,13 @@ export default function Home() {
       });
 
       const data = await response.json();
-      console.log(data, "545554");
-     
-      setNotification("");
+      console.log("Notification sent:", data);
     } catch (error) {
       console.error(error);
     }
   };
 
-  console.log(notification, "notification5555");
+  console.log(notification)
 
   return (
     <div>
@@ -67,6 +84,10 @@ export default function Home() {
         >
           Send Notification
         </button>
+      </div>
+      <div>
+        <h2>Notifications:</h2>
+     
       </div>
     </div>
   );
