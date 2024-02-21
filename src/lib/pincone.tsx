@@ -1,10 +1,13 @@
-import { PineconeClient, Vector } from "pinecone-client";
-import { Pinecone } from '@pinecone-database/pinecone';
+import {
+  PineconeClient,
+  Vector,
+  utils as PineconeUtils,
+} from "@pinecone-database/pinecone";
 import { downloadFromS3 } from "./s3-server";
 import { PDFLoader } from "langchain/document_loaders/fs/pdf";
 import {
   Document,
-  RecursiveCharacterTextSplitter,
+  RecursiveCharacterTextSplitter
 } from "@pinecone-database/doc-splitter";
 import { getEmbeddings } from "./embeddings";
 import md5 from "md5";
@@ -12,14 +15,14 @@ import { convertToAscii } from "./utils";
 
 
 export const getPineconeClient = async () => {
-    const pinecone = new Pinecone({
-      apiKey: process.env.PINECONN_API_KEY ?? '',
-
-  });
- 
-    
+    const pinecone = new PineconeClient();
+    await pinecone.init({
+      environment: process.env.PINECONE_ENVIRONMENT!,
+      apiKey: process.env.PINECONN_API_KEY!,
+    });
   return pinecone;
 };
+
 
 type PDFPage = {
   pageContent: string;
@@ -30,94 +33,24 @@ type PDFPage = {
 
 
 
-export async function loadS3IntoPinecone(fileKey: string) {
-  try {
-      // Download file from S3
-      const fileName = await downloadFromS3(fileKey);
-      if (!fileName) {
-          throw new Error("Could not download file from S3");
-      }
-
-      // Load PDF pages and prepare documents
-      const loader = new PDFLoader(fileName);
-      const pages = await loader.load() as PDFPage[];
-      const documents = await Promise.all(pages.map(prepareDocument));
-
-      // Embed documents and create vectors
-      const vectors = await Promise.all(documents.flat().map(embedDocument));
-
-      // Check if the index exists
-      const client = await getPineconeClient();
-      const indexName = 'chatpdf-file';
-      const indexExists = await client.indexExists(indexName);
-
-      if (!indexExists) {
-          // If index does not exist, handle it accordingly (create index or log an error)
-          throw new Error(`Index '${indexName}' does not exist in Pinecone`);
-      }
-
-      // Upsert vectors into the index
-      const index = client.index(indexName);
-      await index.upsert(vectors);
-
-      return { success: true };
-  } catch (error) {
-      console.error("Error loading S3 into Pinecone:", error);
-      return { success: false, error: "Error loading S3 into Pinecone" };
-  }
-}
-
-
-let lastRequestTime = Date.now();
-
-// Define a function to wait for a specified duration
-function wait(ms:number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-
-export async function processPDF(fileKey: string) {
-  // Ensure a minimum time gap between API requests
-  const currentTime = Date.now();
-  const timeDiff = currentTime - lastRequestTime;
-  const minTimeGap = 20000; // 20 seconds
-  if (timeDiff < minTimeGap) {
-      await wait(minTimeGap - timeDiff);
-  }
-
-  // Update the last request time
-  lastRequestTime = Date.now();
-
-  try {
-    const responce =   await loadS3IntoPinecone(fileKey);
-      return responce;
-  } catch (error) {
-      console.error("Error processing PDF:", error);
-      return { success: false, error: "Internal server error" };
-  }
-}
-
-
 type JsonObject = { [key: string]: any };
 
 async function embedDocument(doc: Document) {
   try {
-    const embeddings = await getEmbeddings(doc.pageContent);
+    const embeddings = await getEmbeddings(doc.pageContent, "text-embedding-ada-002");
     // give a id from pinecone
     const hash = md5(doc.pageContent);
 
-    const vector: Vector<JsonObject> = {
+    return {
       id: hash,
       values: embeddings,
       metadata: {
         text: doc.metadata.text,
         pageNumber: doc.metadata.pageNumber,
       },
-    };
-
-    return vector;
+    } as Vector;
   } catch (error) {
-    console.log("error embedding document");
+    console.log("error embedding document", error);
     throw error;
   }
 }
@@ -143,3 +76,54 @@ async function prepareDocument(page: PDFPage) {
   ]);
   return docs;
 }
+
+export async function loadS3IntoPinecone(fileKey: string) {
+  try {
+    // Obtain the pdf => download and read from pdf
+    console.log("downloading s3 into file system");
+
+    const file_name = await downloadFromS3(fileKey);
+    console.log(file_name,"file_naME")
+
+    if (!file_name) {
+      throw new Error("could not download from s3");
+    }
+
+    const loader = new PDFLoader(file_name);
+    const pages = (await loader.load()) as PDFPage[];
+
+
+    // Initialize an empty array to store processed documents
+    const processedDocuments: Document[][] = [];
+
+    // Iterate over each PDFPage and process it sequentially
+    for (const page of pages) {
+      const documents = await prepareDocument(page);
+      processedDocuments.push(documents);
+    }
+
+    // Flatten the array of arrays into a single array of documents
+    const documents = processedDocuments.flat();
+    
+    // Initialize an empty array to store vectors
+    const vectors: Vector[] = [];
+    // Iterate over each document and embed it sequentially
+    for (const document of documents) {
+      const vector = await embedDocument(document);
+      vectors.push(vector);
+    }
+
+    // Upload vectors into pineconedb
+    const client = await getPineconeClient();
+    const pineconeIndex = client.Index("chatpdf-file");
+    const namespace = convertToAscii(fileKey);
+    PineconeUtils.chunkedUpsert(pineconeIndex, vectors, namespace, 10);
+
+    console.log("Vectors uploaded successfully");
+  } catch (error) {
+    console.error("Error loading S3 into Pinecone:", error);
+    // Additional error handling and logging can be added here
+  }
+}
+
+

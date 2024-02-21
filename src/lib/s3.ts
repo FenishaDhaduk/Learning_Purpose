@@ -40,12 +40,14 @@ export async function uploadToS3(file: File) {
       file_key,
       file_name: file.name,
     });
-  } catch (error) {}
+  } catch (error) {
+    console.log("error from upload in s3",error)
+  }
 }
 
 
 
 export function getS3Url(file_key:string){
-  const url = `https://${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.s3.ap-southeast-1.amozonaws.com/${file_key}`
+  const url = `http://${process.env.NEXT_PUBLIC_S3_BUCKET_NAME}.s3.ap-southeast-1.amazonaws.com/${file_key}`
   return url
 }

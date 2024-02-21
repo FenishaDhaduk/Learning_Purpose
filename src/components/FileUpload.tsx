@@ -1,5 +1,4 @@
-"use client";
-
+"use client"
 import { uploadToS3 } from "@/lib/s3";
 import { useMutation } from "@tanstack/react-query";
 import { Inbox, Loader2 } from "lucide-react";
@@ -12,7 +11,7 @@ import { useRouter } from "next/navigation";
 const FileUpload = () => {
   const [uploading, setUploading] = React.useState(false);
   const router = useRouter();
-  const { mutate } = useMutation({
+  const { mutate} = useMutation({
     mutationFn: async ({
       file_key,
       file_name,
@@ -31,7 +30,6 @@ const FileUpload = () => {
     accept: { "application/pdf": [".pdf"] },
     maxFiles: 1,
     onDrop: async (acceptedFiles) => {
-      console.log(acceptedFiles);
       const file = acceptedFiles[0];
       if (file.size > 10 * 1024 * 1024) {
         // bigger than 10mb
@@ -39,7 +37,6 @@ const FileUpload = () => {
         alert("please upload smaller file");
         return;
       }
-
       try {
         setUploading(true);
         const data = await uploadToS3(file);
@@ -49,17 +46,17 @@ const FileUpload = () => {
         }
         mutate(data, {
           onSuccess: (chat_id) => {
-            console.log(chat_id?.chat_id, "pdfdata");
             router.push(`/chat/${chat_id?.chat_id}`);
             toast.success("Chat Created!");
+        setUploading(false);
+            
           },
           onError: (error) => {
             toast.error("error createing in chat");
+            setUploading(false);
             console.log(error);
           },
         });
-        setUploading(false);
-        console.log(data, "datafile");
       } catch (error) {
         setUploading(false);
         console.log(error);

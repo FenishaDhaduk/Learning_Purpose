@@ -2,10 +2,12 @@
 
 import { db } from "@/lib/db";
 import { chats } from "@/lib/db/schema";
-import { loadS3IntoPinecone, processPDF } from "@/lib/pincone";
+import { loadS3IntoPinecone} from "@/lib/pincone";
 import { getS3Url } from "@/lib/s3";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
+
+
 
 export async function POST(req: Request, res: Response) {
   const { userId } = await auth();
@@ -15,8 +17,7 @@ export async function POST(req: Request, res: Response) {
   try {
     const body = await req.json();
     const { file_key, file_name } = body;
-    console.log(file_key, file_name);
-    await processPDF(file_key);
+    await loadS3IntoPinecone(file_key);
    const chat_id =  await db.insert(chats).values({
       fileKey: file_key,
       pdfName: file_name,

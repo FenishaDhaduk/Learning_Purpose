@@ -63,3 +63,7 @@ npm i pdf-parse = Pure javascript cross-platform module to extract texts from PD
 @pinecone-database/doc-splitter = for spilt the pdf
 npm i openai-edge
 npm i md5 = a JavaScript function for hashing messages with MD5.
+
+
+craete chat
+https://vercel.com/blog/introducing-the-vercel-ai-sdk = for a ai-> google search (vercel ai sdk)

@@ -13,7 +13,6 @@ type Props = {
 };
 
 const ChatSideBar = ({ chats, chatId }: Props) => {
-  console.log(chatId)
   return (
     <div className="w-full h-screen p-4 text-gray-200 bg-gray-900">
       <Link href="/">
@@ -36,6 +35,15 @@ const ChatSideBar = ({ chats, chatId }: Props) => {
               </div>
             </Link>
         ))}
+
+      </div>
+      <div className="absolute bottom-4 left-4">
+        <div className="flex items-center gap-2 text-sm text-slate-500 flex-wrap">
+          <Link href={'/'}>Home</Link>
+          <Link href={'/'}>Source</Link>
+          {/* Stripe button */}
+
+        </div>
 
       </div>
     </div>
