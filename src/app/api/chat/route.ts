@@ -2,7 +2,7 @@ import { Configuration, OpenAIApi } from "openai-edge";
 import { Message, OpenAIStream, StreamingTextResponse } from "ai";
 import { getContext } from "@/lib/context";
 import { db } from "@/lib/db";
-import { chats } from "@/lib/db/schema";
+import { chats, message as _messages } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
@@ -21,12 +21,16 @@ export async function POST(req: Request, res: Response) {
   try {
     const { messages, chatId } = await req.json();
     const _chats = await db.select().from(chats).where(eq(chats.id, chatId));
+    console.log(_chats,chatId,"65666")
     if (_chats.length != 1) {
       return NextResponse.json({ error: "chat not found" }, { status: 404 });
     }
 
     const fileKey = _chats[0].fileKey;
     const lastmessage = messages[messages.length - 1];
+    console.log(lastmessage,"lastmessages")
+    console.log(fileKey,"filekey")
+    console.log(...messages.filter((message: Message) => message.role === "user"), "messages"); 
     const context = await getContext(lastmessage.content, fileKey);
 
     const prompt = {
@@ -47,15 +51,37 @@ export async function POST(req: Request, res: Response) {
     // Ask OpenAI for a streaming chat completion given the prompt
     const response = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
-      messages:[
-        prompt,...messages.filter((message:Message)=>message.role === 'user'),
+      messages: [
+        prompt,
+        ...messages.filter((message: Message) => message.role === "user"),
       ],
       stream: true,
     });
+    console.log(response,"chatresponce")
     // Convert the response into a friendly text-stream
-    const stream = OpenAIStream(response);
+    const stream = OpenAIStream(response, {
+      onStart: async () => {
+        // save  user message into db
+        await db.insert(_messages).values({
+          chatId,
+          content: lastmessage.content,
+          role: 'user',
+        });
+      },
+      onCompletion:async(completion)=>{
+        // save ai messages in db
+        await db.insert(_messages).values({
+          chatId,
+          content: completion,
+          role: 'system',
+        });
+
+
+      }
+    });
     return new StreamingTextResponse(stream);
   } catch (error) {
-    console.log("error in create a chat context",error)
+    console.log("error in create a chat context", error);
+    return NextResponse.json({ error: "An error occurred" }, { status: 500 });
   }
 }

@@ -1,17 +1,26 @@
 import { cn } from "@/lib/utils";
 import { Message } from "ai/react";
+import { Loader2 } from "lucide-react";
 import React from "react";
 
 type Props = {
   messages: Message[];
+  isLoading:boolean
 };
 
-const MessageList = ({ messages }: Props) => {
+const MessageList = ({ messages,isLoading }: Props) => {
+  if(isLoading){
+    return(
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+        <Loader2 className="w-6 h-6 animate-spin"/>
+
+      </div>
+    )
+  }
   if (!messages) return <></>;
   return (
     <div className="flex flex-col gap-2 px-4">
       {messages.map((message) => {
-        {console.log("message",message.content)}
         return (
           <div
             key={message.id}
