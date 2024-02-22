@@ -22,7 +22,6 @@
     "axios": "^1.6.7",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
-    "cors": "^2.8.5",
     "dotenv": "^16.4.2",
     "drizzle-kit": "^0.20.14",
     "drizzle-orm": "^0.29.3",
@@ -39,8 +38,6 @@
     "react-dom": "^18",
     "react-dropzone": "^14.2.3",
     "react-hot-toast": "^2.4.1",
-    "react-pdf": "^7.7.0",
-    "stripe": "^14.17.0",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7"
   },
