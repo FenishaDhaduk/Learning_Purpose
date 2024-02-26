@@ -21,16 +21,13 @@ export async function POST(req: Request, res: Response) {
   try {
     const { messages, chatId } = await req.json();
     const _chats = await db.select().from(chats).where(eq(chats.id, chatId));
-    console.log(_chats,chatId,"65666")
     if (_chats.length != 1) {
       return NextResponse.json({ error: "chat not found" }, { status: 404 });
     }
 
     const fileKey = _chats[0].fileKey;
     const lastmessage = messages[messages.length - 1];
-    console.log(lastmessage,"lastmessages")
-    console.log(fileKey,"filekey")
-    console.log(...messages.filter((message: Message) => message.role === "user"), "messages"); 
+
     const context = await getContext(lastmessage.content, fileKey);
 
     const prompt = {
@@ -57,7 +54,6 @@ export async function POST(req: Request, res: Response) {
       ],
       stream: true,
     });
-    console.log(response,"chatresponce")
     // Convert the response into a friendly text-stream
     const stream = OpenAIStream(response, {
       onStart: async () => {

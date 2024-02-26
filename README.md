@@ -51,11 +51,13 @@ drizzle-orm :- Drizzle-ORM is a lightweight Object-Relational Mapping (ORM) libr
 Neon Database :- Serverless databases is Neon Database .  such as Neon Database, are cloud-based databases that automatically scale and manage resources based on demand. They provide a serverless computing model, where you don't have to worry about infrastructure provisioning, scaling, or maintenance.Neon Database, specifically designed for serverless environments, allows you to store and retrieve data without having to manage the underlying infrastructure. 
 
 
-npx drizzle-kit studio :- Drizzle Studio is a new way for you to explore SQL database on Drizzle projects.
+npx drizzle-kit studio :- Drizzle Studio is a new way for you to explore SQL database on Drizzle projects.store a data 
 
 npm i react-dropzone :- file drop mate
 
 npm i aws-sdk
+
+openai api key = https://openai.com/
 
 npm i @pinecone-database/pinecone 
 npm i langchain - for a chatmodel 
