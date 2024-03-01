@@ -5,7 +5,8 @@ import io from "socket.io-client";
 const socket = io("http://172.16.17.121:3001");
 
 export default function Home() {
-  const [notification, setNotification] = useState([]);
+  const [notification, setNotification] = useState();
+  const [newNotification, setNewNotification] = useState([]);
 
   useEffect(() => {
     socket.on("newNotification", (data) => {
@@ -31,14 +32,12 @@ export default function Home() {
       });
 
       const data = await response.json();
-      console.log("Fetched notifications:", data?.notifications);
-      setNotification(data?.notifications);
+      setNewNotification(data?.notifications);
     } catch (error) {
       console.log(error, "error");
     }
   };
 
-  console.log(notification, "897465132");
 
   const sendNotification = async (event) => {
     event.preventDefault();
@@ -53,13 +52,14 @@ export default function Home() {
       });
 
       const data = await response.json();
-      console.log("Notification sent:", data);
+      setNotification([])
+      return data
     } catch (error) {
       console.error(error);
     }
   };
 
-  console.log(notification)
+  console.log(newNotification,"5454")
 
   return (
     <div>
@@ -87,7 +87,15 @@ export default function Home() {
       </div>
       <div>
         <h2>Notifications:</h2>
-     
+        
+     {
+      newNotification.map((notification) => (
+         <div key={notification._id}>
+           <li>{notification.message}</li>
+           <li>{notification.timestamp}</li>
+         </div>
+       ))
+     }
       </div>
     </div>
   );
