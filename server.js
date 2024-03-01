@@ -29,9 +29,10 @@ io.on('connection', (socket) => {
 });
 
 app.post('/notification', async (req, res) => {
+    let notification =[]
     try {
         const { message } = req.body;
-        const notification = new Notification({ message });
+         notification = new Notification({ message });
         await notification.save();
         // Emit the new notification to all connected clients
         io.emit('newNotification', notification);
@@ -44,8 +45,9 @@ app.post('/notification', async (req, res) => {
 });
 
 app.get('/notifications', async (req, res) => {
+let notifications = []
     try {
-        const notifications = await Notification.find().exec();
+      notifications = await Notification.find().exec();
         const totalCount = await Notification.countDocuments().exec();
         io.emit('fetchnotification', notifications);
         res.status(200).json({ success: true, notifications,totalCount });
@@ -54,6 +56,8 @@ app.get('/notifications', async (req, res) => {
         res.status(500).json({ success: false, error: 'Internal server error' });
     }
 });
+
+
 
 const PORT = 3001;
 server.listen(PORT, () => {
