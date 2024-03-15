@@ -1,15 +1,49 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Table } from "react-bootstrap";
-
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import { ADD, DELETE, REMOVE } from "../redux/actions/action";
 
 function CardDetails() {
+  const [data, setData] = useState([]);
+  const { id } = useParams();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const getData = useSelector((state) => state.cartreducer.carts);
+
+ 
+  useEffect(() => {
+    fetchSingleData();
+  }, [getData]);
+
+  const fetchSingleData = () => {
+    let item = getData.filter((e) => {
+      return e.id == id;
+    });
+    setData(item[0]);
+  };
+
+  console.log(data,"data")
+  const addItem = (data) => {
+    dispatch(ADD(data));
+  };
+
+  const deleteItem = (id) => {
+    dispatch(DELETE(id));
+    navigate("/");
+  };
+
+  const removeoneitem = (item)=>{
+    dispatch(REMOVE(item))
+  }
+  
   return (
     <div className="container  mt-2">
       <h2 className="text-center">Iteams Details Page</h2>
       <section className="container mt-3">
         <div className="iteamsdetails">
           <div className="items_img">
-            <img src="https://b.zmtcdn.com/data/pictures/9/18857339/8f53919f1175c08cf0f0371b73704f9b_o2_featured_v2.jpg?output-format=webp" />
+            <img src={data?.imgdata} />
           </div>
           <div className="details">
             <Table>
@@ -17,20 +51,27 @@ function CardDetails() {
                 <td>
                   <p>
                     {" "}
-                    <strong>Restaurant</strong> : Masala
+                    <strong>Restaurant</strong> : {data?.rname}
                   </p>
                   <p>
                     {" "}
-                    <strong>Price</strong> : ₹300
+                    <strong>Price</strong> : ₹{data?.price}
                   </p>
                   <p>
                     {" "}
-                    <strong>Dishes</strong> : NorthIndian
+                    <strong>Dishes</strong> : {data?.address}
                   </p>
                   <p>
                     {" "}
-                    <strong>Total</strong> :₹ 300
+                    <strong>Total</strong> :₹ {data?.price * data?.qnty}
                   </p>
+                  <div className='mt-5 d-flex justify-content-between align-items-center' style={{width:100,cursor:"pointer",background:"#ddd",color:"#111"}}>
+                  <span style={{fontSize:24}}  onClick={data.qnty <=1 ? ()=>deleteItem(data.id) : ()=>removeoneitem(data)}>-</span>
+                  <span style={{fontSize:22}}>{data?.qnty}</span>
+                  <span style={{fontSize:24}} onClick={()=>addItem(data)}>+</span>
+
+                  </div>
+
                 </td>
                 <td>
                   <p>
@@ -43,16 +84,16 @@ function CardDetails() {
                         borderRadius: "5px",
                       }}
                     >
-                      3.5 ★{" "}
+                      {data?.rating}★{" "}
                     </span>
                   </p>
                   <p>
                     <strong>Order Review :</strong>{" "}
-                    <span>1175 + order placed from here recently </span>
+                    <span>{data?.somedata} </span>
                   </p>
                   <p>
                     <strong>Remove :</strong>{" "}
-                    <span>
+                    <span onClick={() => deleteItem(data?.id)}>
                       <i
                         className="fas fa-trash"
                         style={{

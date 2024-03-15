@@ -5,3 +5,20 @@ export const ADD = (item)=>{
     }
 
 }
+
+export const DELETE = (id)=>{
+    return {
+        type:"DEL_CART",
+        payload:id
+    }
+
+}
+
+// remove individual iteam
+
+export const REMOVE = (iteam) => {
+    return {
+        type: "RMV_ONE",
+        payload: iteam
+    }
+}

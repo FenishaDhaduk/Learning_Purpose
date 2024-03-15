@@ -1,28 +1,51 @@
-import React from "react";
+import React, { useState } from "react";
 import Container from "react-bootstrap/Container";
 import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import Badge from "@mui/material/Badge";
 import Menu from "@mui/material/Menu";
 import { NavLink } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Table } from "react-bootstrap";
+import { DELETE } from "../redux/actions/action";
 
 function Header() {
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [totalPrice,setTotalPrice] = React.useState(0)
   const open = Boolean(anchorEl);
 
   const getData = useSelector((state) => state.cartreducer.carts);
-  console.log(getData);
+
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
+
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const dispatch = useDispatch();
+
+  const deleteItem = (id) => {
+    dispatch(DELETE(id));
+  };
+
+  const totalItem = ()=>{
+    let total = 0;
+    getData.map((e)=>{
+      total = e.price * e.qnty + total
+    })
+    console.log(total,"total")
+    setTotalPrice(total)
+  }
+
+  React.useEffect(() => {
+    totalItem()
+  }, [totalItem])
   return (
-    <>
-      <Navbar bg="dark" data-bs-theme="dark" style={{ height: "60px" }}>
+    <> 
+      <Navbar bg="dark" data-bs-theme="dark" style={{ height: "60px",position:"sticky",top:0,zIndex:1020}}>
         <Container>
           <NavLink to="/" className="text-decoration-none mx-3 text-light">
             Add To Cart
@@ -74,7 +97,7 @@ function Header() {
                             <NavLink to={`/cart/${e.id}`} onClick={handleClose}>
                               <img
                                 src={e.imgdata}
-                                style={{ width: "5rem", height: "5rem" }}
+                                style={{ width: "6.5rem", height: "6.5rem" }}
                                 alt=""
                               />
                             </NavLink>
@@ -89,6 +112,7 @@ function Header() {
                                 fontSize: 20,
                                 cursor: "pointer",
                               }}
+                              onClick={() => deleteItem(e.id)}
                             >
                               <i className="fas fa-trash smalltrash"></i>
                             </p>
@@ -101,6 +125,7 @@ function Header() {
                               fontSize: 20,
                               cursor: "pointer",
                             }}
+                            onClick={() => deleteItem(e.id)}
                           >
                             <i className="fas fa-trash largetrash"></i>
                           </td>
@@ -108,6 +133,7 @@ function Header() {
                       </>
                     );
                   })}
+                  <p className="text-center mt-2"><strong>Total</strong> :₹{totalPrice}</p>
                 </tbody>
               </Table>
             </div>
@@ -136,7 +162,6 @@ function Header() {
               />
             </div>
           )}
-          <p className="text-center">Price :₹300</p>
         </Menu>
       </Navbar>
     </>
