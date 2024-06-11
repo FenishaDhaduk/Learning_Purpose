@@ -1,0 +1,80 @@
+.otp-container {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.otp-container input {
+  width: 40px; /* Adjusted width for better visibility */
+  height: 40px;
+  margin: 0 5px;
+  font-size: 20px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.otp-container input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-family: Arial, sans-serif;
+}
+
+.App input {
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.otpinput {
+  width: 30px; /* Adjusted width for better visibility */
+  height: 30px;
+  margin: 0 5px;
+  font-size: 20px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.otpinput:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.App input:hover {
+  border-color: #0056b3;
+}
+
+.App button {
+  padding: 10px 20px;
+  margin: 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.App button:hover {
+  background-color: #0056b3;
+}
+
+.App p {
+  color: red;
+}
+
+.libraryotp {
+  font-family: sans-serif;
+  text-align: center;
+  background-color: #f3f3f3;
+  padding: 20px;
+}
