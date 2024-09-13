@@ -114,11 +114,19 @@
   .sticky-date-header {
     position: sticky;
     top: 0;
-    background-color: #f0f0f0;
+    background-color: #363434;
     padding: 5px 10px;
     text-align: center;
     font-weight: bold;
     z-index: 1;
+    left: 68%;
+    color: #a49e9e;
+    border: 1px solid #363434;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 0;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    width: fit-content;
   }
   
   .date-header {
