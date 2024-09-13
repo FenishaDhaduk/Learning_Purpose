@@ -1,0 +1,43 @@
+/* src/components/UserList.css */
+
+.user-list {
+    padding: 10px;
+    overflow-y: auto;
+    height: 100vh;
+    background-color: #ffffff;
+    border-right: 1px solid #ddd;
+  }
+  
+  .user-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+  }
+  
+  .user-item:hover {
+    background-color: #f0f0f0;
+  }
+  
+  .user-item img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+  
+  .user-info h4 {
+    margin: 0;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .user-info .user-status {
+    font-size: 12px;
+    color: #999;
+    margin-top: 2px;
+  }
+  

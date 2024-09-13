@@ -1,0 +1,130 @@
+/* src/components/ChatWindow.css */
+
+.chat-window {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: #e5ddd5;
+  }
+  
+  .chat-header {
+  
+    display: flex;
+    align-items: center;
+    
+  }
+  
+  .chat-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+    margin: 2px;
+  }
+  .main-header{
+    background-color: #075e54;
+    color: white;
+    border-bottom: 1px solid #ddd;
+    padding: 15px;
+
+  }
+  .typing-indicator {
+    color: white;
+  }
+  .messages-area {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: #efeae2;
+  }
+  
+  .message {
+    max-width: 60%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    position: relative;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  
+  .message-sent {
+    background-color: #dcf8c6;
+    align-self: flex-end;
+    margin-left: auto;
+  }
+  
+  .message-received {
+    background-color: #ffffff;
+    align-self: flex-start;
+  }
+  
+  .message-content {
+    word-wrap: break-word;
+  }
+  
+  .message-timestamp {
+    font-size: 11px;
+    color: #999;
+    position: absolute;
+    bottom: 5px;
+    right: 8px;
+  }
+  
+  .input-area {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #f0f2f5;
+    border-top: 1px solid #ddd;
+  }
+  
+  .input-area input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 20px;
+    margin-right: 10px;
+    outline: none;
+    font-size: 14px;
+  }
+  
+  .input-area button {
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    margin-left: 5px;
+    width: 200px;
+  }
+  
+  .input-area button svg {
+    width: 24px;
+    height: 24px;
+    color: #075e54;
+  }
+  
+  .input-area button:hover svg {
+    color: #128c7e;
+  }
+  
+  .send-button svg {
+    color: #075e54;
+  }
+  
+
+  .sticky-date-header {
+    position: sticky;
+    top: 0;
+    background-color: #f0f0f0;
+    padding: 5px 10px;
+    text-align: center;
+    font-weight: bold;
+    z-index: 1;
+  }
+  
+  .date-header {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 12px;
+    color: gray;
+  }
+  
