@@ -72,7 +72,7 @@ const socketHandler = (io) => {
         // Update message status to delivered if receiver is online
         if (connectedUsers[receiverId]) {
           await Message.findByIdAndUpdate(message._id, { status: 'delivered' });
-          io.to(senderId).emit('messageStatusUpdate', { messageId: message._id, status: 'delivered' });
+          io.to(senderId).emit('messageStatusUpdate', { messageId: message?._id, status: 'delivered' });
         }
       } catch (error) {
         console.error("Error sending message:", error);
