@@ -187,6 +187,10 @@ const socketHandler = (io) => {
     }
   };
 
+  
+
+  
+
   // Main connection handler
   io.on("connection", (socket) => {
     console.log("A user connected:", socket.id);
@@ -201,8 +205,41 @@ const socketHandler = (io) => {
     socket.on("stopTyping", ({ senderId, receiverId }) => {
       io.to(receiverId).emit("userStoppedTyping", { senderId, receiverId });
     });
+
+    socket.on("messageEdited", async (updatedMessage) => {
+      try {
+        // Update the message in the database
+        const message = await Message.findByIdAndUpdate(
+          updatedMessage._id,
+          { 
+            content: updatedMessage.content,
+            isEdited: true,
+            $push: { 
+              editHistory: { 
+                content: updatedMessage.content, 
+                editedAt: new Date() 
+              } 
+            }
+          },
+          { new: true }
+        );
+
+        if (message) {
+          // Broadcast the edited message to both sender and receiver
+          io.to(message.receiver.toString()).emit("messageEdited", message);
+          io.to(message.sender.toString()).emit("messageEdited", message);
+          console.log(`Message ${message._id} edited and broadcasted`);
+        } else {
+          console.error(`Message ${updatedMessage._id} not found for editing`);
+        }
+      } catch (error) {
+        console.error("Error handling messageEdited event:", error);
+      }
+    });
     socket.on("disconnect", () => handleDisconnect(socket));
   });
+
+
 };
 
 export default socketHandler;

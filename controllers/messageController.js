@@ -36,3 +36,36 @@ export const getMessages = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+export const editMessage = async (req, res) => {
+  try {
+    const { messageId, newContent } = req.body;
+    const userId = req.user.id; // Assuming you have user info in the request after authentication
+
+    const message = await Message.findById(messageId);
+
+    if (!message) {
+      return res.status(404).json({ error: 'Message not found' });
+    }
+
+    if (message.sender.toString() !== userId) {
+      return res.status(403).json({ error: 'You can only edit your own messages' });
+    }
+
+    // Add the current content to edit history
+    message.editHistory.push({
+      content: message.content,
+      editedAt: new Date()
+    });
+
+    // Update the message content
+    message.content = newContent;
+    message.isEdited = true;
+
+    await message.save();
+
+    res.json({ message: 'Message updated successfully', data: message });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};
