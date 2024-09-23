@@ -1,14 +1,11 @@
-// components/ChatMessages.js
-import React, { useState } from 'react';
-import { formatDateHeader, isSameDay, getStatusIcon } from '../utils/messageUtils';
-import { format} from 'date-fns';
-import socket from '../services/socket';
+import React, { useState } from "react";
+import { format, isToday, isYesterday, isThisWeek } from "date-fns";
+import socket from "../services/socket";
+import {getStatusIcon } from '../utils/messageUtils';
 
-
-const ChatMessages = ({ messages, user,selectedUser}) => {
-    const [editingMessageId, setEditingMessageId] = useState(null);
-    const [editContent, setEditContent] = useState("");
-
+const ChatMessages = ({ messages, user, selectedUser }) => {
+  const [editingMessageId, setEditingMessageId] = useState(null);
+  const [editContent, setEditContent] = useState("");
 
   const handleEditMessage = (messageId) => {
     const messageToEdit = messages.find((msg) => msg._id === messageId);
@@ -29,14 +26,24 @@ const ChatMessages = ({ messages, user,selectedUser}) => {
       setEditContent("");
     }
   };
+
   const renderMessagesWithHeaders = () => {
     const groupedMessages = [];
     let currentDate = null;
-  
+
     messages.forEach((message, index) => {
       const messageDate = new Date(message.createdAt);
-      const formattedDate = format(messageDate, 'MMMM d, yyyy');
-  
+
+      let formattedDate = format(messageDate, "MMMM d, yyyy"); // Default format
+
+      if (isToday(messageDate)) {
+        formattedDate = "Today";
+      } else if (isYesterday(messageDate)) {
+        formattedDate = "Yesterday";
+      } else if (isThisWeek(messageDate)) {
+        formattedDate = format(messageDate, "EEEE"); // Display weekday name (e.g., "Monday")
+      }
+
       if (formattedDate !== currentDate) {
         groupedMessages.push({
           type: "dateHeader",
@@ -44,13 +51,13 @@ const ChatMessages = ({ messages, user,selectedUser}) => {
         });
         currentDate = formattedDate;
       }
-  
+
       groupedMessages.push({
         type: "message",
         message,
       });
     });
-  
+
     return groupedMessages.map((item, index) => {
       if (item.type === "dateHeader") {
         return (
@@ -80,20 +87,16 @@ const ChatMessages = ({ messages, user,selectedUser}) => {
             ) : (
               <>
                 <div className="message-content">
-                <p>
-                
-                {msg.content}
-                </p>
-                <span className="message-timestamp">
-                  {format(new Date(msg.createdAt), "hh:mm a")}
-                  {msg.sender === user?.id && getStatusIcon(msg.status)}
-                  {msg.isEdited && " (edited)"}
-                </span>
-                {msg.sender === user?.id && (
-                  <button onClick={() => handleEditMessage(msg._id)}>Edit</button>
-                )}
+                  <p>{msg.content}</p>
+                  <span className="message-timestamp">
+                    {format(new Date(msg.createdAt), "hh:mm a")}
+                    {msg.sender === user?.id && getStatusIcon(msg.status)}
+                    {msg.isEdited && " (edited)"}
+                  </span>
+                  {msg.sender === user?.id && (
+                    <button onClick={() => handleEditMessage(msg._id)}>Edit</button>
+                  )}
                 </div>
-
               </>
             )}
           </div>

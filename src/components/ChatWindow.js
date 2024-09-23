@@ -76,13 +76,16 @@ const ChatWindow = ({ selectedUser }) => {
         <ChatMessages messages={messages} user={user} setStickyHeader={setStickyHeader} selectedUser={selectedUser} />
         <div ref={messagesEndRef} />
       </div>
+      <div className='typing'>
+      
+      <TypingIndicator typingUsers={typingUsers} selectedUser={selectedUser} />
+      </div>
       <ChatInput
         user={user}
         selectedUser={selectedUser}
         setIsTyping={setTypingUsers}
         setMessages={setMessages}
       />
-      <TypingIndicator typingUsers={typingUsers} selectedUser={selectedUser} />
     </div>
   );
 };
