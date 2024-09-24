@@ -103,7 +103,7 @@ const ChatMessages = ({ messages, user, selectedUser }) => {
         );
       } else {
         const msg = item.message;
-        const canEdit = editableMessages[msg._id]; // Check if message is editable
+        const canEdit = editableMessages[msg._id]; 
 
         return (
           <div

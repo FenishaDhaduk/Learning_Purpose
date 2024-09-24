@@ -19,11 +19,11 @@ export const isSameDay = (date1, date2) => {
 export const getStatusIcon = (status) => {
   switch (status) {
     case 'sent':
-      return '✓'; // Single tick
+      return '✓'; 
     case 'delivered':
-      return '✓✓'; // Double tick
+      return '✓✓'; 
     case 'seen':
-      return <span style={{ color: 'blue' }}>✓✓</span>; // Double tick blue
+      return <span style={{ color: 'blue' }}>✓✓</span>; 
     default:
       return '';
   }

@@ -14,11 +14,6 @@ const ChatInput = ({ user, selectedUser, setIsTyping }) => {
         content: inputMessage,
       });
       setInputMessage("");
-      // // Stop typing indication after message is sent
-      // socket.emit("stopTyping", {
-      //   senderId: user?.id,
-      //   receiverId: selectedUser._id,
-      // });
     }
   };
 
