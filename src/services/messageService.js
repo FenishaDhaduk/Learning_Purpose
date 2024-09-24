@@ -1,4 +1,3 @@
-// services/messageService.js
 import { fetchWithAuth } from './api';
 import socket from '../services/socket';
 

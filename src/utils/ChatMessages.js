@@ -1,16 +1,53 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { format, isToday, isYesterday, isThisWeek } from "date-fns";
 import socket from "../services/socket";
-import {getStatusIcon } from '../utils/messageUtils';
+import { getStatusIcon } from "../utils/messageUtils";
 
 const ChatMessages = ({ messages, user, selectedUser }) => {
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [editContent, setEditContent] = useState("");
+  const [editableMessages, setEditableMessages] = useState({});
+  const editTimeLimit = 15 * 60 * 1000; // 15 minutes in milliseconds
+
+  useEffect(() => {
+    // Check and update editable status for each message initially
+    const initialEditableMessages = {};
+    messages.forEach((msg) => {
+      initialEditableMessages[msg._id] = isMessageEditable(msg.createdAt);
+    });
+    setEditableMessages(initialEditableMessages);
+
+    // Set an interval to check every 30 seconds for messages that may become uneditable
+    const intervalId = setInterval(() => {
+      const updatedEditableMessages = {};
+      messages.forEach((msg) => {
+        updatedEditableMessages[msg._id] = isMessageEditable(msg.createdAt);
+      });
+      setEditableMessages(updatedEditableMessages);
+    }, 30000); // Check every 30 seconds
+
+    // Clean up the interval on component unmount
+    return () => clearInterval(intervalId);
+  }, [messages]);
+
+  // Function to check if the message is still editable
+  const isMessageEditable = (createdAt) => {
+    const now = new Date();
+    const messageTime = new Date(createdAt);
+    const timeDiff = now - messageTime;
+    return timeDiff <= editTimeLimit;
+  };
 
   const handleEditMessage = (messageId) => {
     const messageToEdit = messages.find((msg) => msg._id === messageId);
-    setEditingMessageId(messageId);
-    setEditContent(messageToEdit.content);
+
+    // Check if the message is still editable
+    if (isMessageEditable(messageToEdit.createdAt)) {
+      setEditingMessageId(messageId);
+      setEditContent(messageToEdit.content);
+    } else {
+      alert("You can only edit messages within 15 minutes of sending.");
+    }
   };
 
   const handleSaveEdit = () => {
@@ -33,7 +70,6 @@ const ChatMessages = ({ messages, user, selectedUser }) => {
 
     messages.forEach((message, index) => {
       const messageDate = new Date(message.createdAt);
-
       let formattedDate = format(messageDate, "MMMM d, yyyy"); // Default format
 
       if (isToday(messageDate)) {
@@ -67,6 +103,8 @@ const ChatMessages = ({ messages, user, selectedUser }) => {
         );
       } else {
         const msg = item.message;
+        const canEdit = editableMessages[msg._id]; // Check if message is editable
+
         return (
           <div
             key={`msg-${msg._id}`}
@@ -93,8 +131,10 @@ const ChatMessages = ({ messages, user, selectedUser }) => {
                     {msg.sender === user?.id && getStatusIcon(msg.status)}
                     {msg.isEdited && " (edited)"}
                   </span>
-                  {msg.sender === user?.id && (
-                    <button onClick={() => handleEditMessage(msg._id)}>Edit</button>
+                  {msg.sender === user?.id && canEdit && (
+                    <button onClick={() => handleEditMessage(msg._id)}>
+                      Edit
+                    </button>
                   )}
                 </div>
               </>

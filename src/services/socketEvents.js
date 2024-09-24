@@ -1,4 +1,3 @@
-// services/socketEvents.js
 import socket from './socket';
 
 export const setupSocketListeners = (
