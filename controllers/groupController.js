@@ -104,3 +104,37 @@ export const fetchGroups = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch groups' });
   }
 };
+
+
+export const leaveGroup = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const userId = req.user.id;
+
+    const group = await Group.findById(groupId);
+    if (!group) return res.status(404).json({ message: 'Group not found' });
+
+    // Check if the user is a member of the group
+    if (!group.members.includes(userId)) {
+      return res.status(400).json({ message: 'You are not a member of this group' });
+    }
+
+    // If the user is the last admin, prevent them from leaving or handle it
+    if (group.admins.includes(userId)) {
+      if (group.admins.length === 1) {
+        return res.status(400).json({ message: 'Cannot leave the group as the last admin. Transfer admin rights first.' });
+      }
+
+      // Remove the user from admins if they are an admin
+      group.admins = group.admins.filter(id => id.toString() !== userId);
+    }
+
+    // Remove the user from the group members
+    group.members = group.members.filter(id => id.toString() !== userId);
+
+    await group.save();
+    res.json({ message: 'You have left the group', data: group });
+  } catch (error) {
+    res.status(500).json({ error: 'Server error' });
+  }
+};
