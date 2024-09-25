@@ -8,6 +8,7 @@ import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import groupRoutes from './routes/groupRoutes.js';
 import socketHandler from './sockets/socketHandler.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -42,6 +43,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/group', groupRoutes);
 app.use('/uploads/profileImages', express.static(path.join(__dirname, 'uploads/profileImages')));
 
 socketHandler(io);

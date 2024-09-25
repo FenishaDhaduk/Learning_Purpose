@@ -1,29 +1,24 @@
 import Group from '../models/Group.js';
-import User from '../models/User.js';
 
 
 export const createGroup = async (req, res) => {
   try {
     const { name, members } = req.body;
 
-    // Ensure the user creating the group is added as an admin
     const group = new Group({
       name,
-      members,
+      members: [...members, req.user.id], // Include creator in members list
       admins: [req.user.id], // The creator becomes the first admin
     });
 
     await group.save();
-
     res.status(201).json({ message: 'Group created successfully', data: group });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
   }
 };
 
-/**
- * Add or remove members from a group
- */
+
 export const manageMembers = async (req, res) => {
   try {
     const { groupId } = req.params;
@@ -32,6 +27,7 @@ export const manageMembers = async (req, res) => {
     const group = await Group.findById(groupId);
     if (!group) return res.status(404).json({ message: 'Group not found' });
 
+    // Check if the user performing the action is an admin
     if (!group.admins.includes(req.user.id)) {
       return res.status(403).json({ message: 'Only admins can manage group members' });
     }
@@ -45,7 +41,10 @@ export const manageMembers = async (req, res) => {
     } else if (action === 'remove') {
       group.members = group.members.filter(id => id.toString() !== memberId);
 
-      group.admins = group.admins.filter(id => id.toString() !== memberId);
+      // Remove from admins if necessary
+      if (group.admins.includes(memberId)) {
+        group.admins = group.admins.filter(id => id.toString() !== memberId);
+      }
     } else {
       return res.status(400).json({ message: 'Invalid action' });
     }
@@ -65,8 +64,14 @@ export const manageAdmins = async (req, res) => {
     const group = await Group.findById(groupId);
     if (!group) return res.status(404).json({ message: 'Group not found' });
 
+    // Check if the user performing the action is an admin
     if (!group.admins.includes(req.user.id)) {
       return res.status(403).json({ message: 'Only admins can manage other admins' });
+    }
+
+    // Check if the user to be promoted/demoted is a member of the group
+    if (!group.members.includes(adminId)) {
+      return res.status(400).json({ message: 'User is not a member of the group' });
     }
 
     if (action === 'promote') {
@@ -88,5 +93,14 @@ export const manageAdmins = async (req, res) => {
     res.json({ message: 'Admin status updated', data: group });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
+  }
+};
+
+export const fetchGroups = async (req, res) => {
+  try {
+    const groups = await Group.find().populate('members admins', 'name');
+    res.status(200).json(groups);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch groups' });
   }
 };
