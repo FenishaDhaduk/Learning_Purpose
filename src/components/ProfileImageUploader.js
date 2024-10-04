@@ -2,9 +2,12 @@
 import React, { useState, useRef } from 'react';
 import AvatarEditor from 'react-avatar-editor';
 import axios from 'axios';
+import { Icon } from '@iconify/react/dist/iconify.js';
+import CreateGroupModal from '../utils/CreateGroupModal';
 
 const ProfileImageUploader = ({user,  onUpdate }) => {
   const [image, setImage] = useState(null);
+  const [modalIsOpen, setIsOpen] = React.useState(false);
   const editorRef = useRef(null);
   const [scale, setScale] = useState(1);
 
@@ -14,6 +17,11 @@ const ProfileImageUploader = ({user,  onUpdate }) => {
       setImage(file);
     }
   };
+
+
+  function openModal() {
+    setIsOpen(!modalIsOpen);
+  }
 
   const handleSave = async () => {
     if (editorRef.current) {
@@ -37,6 +45,8 @@ const ProfileImageUploader = ({user,  onUpdate }) => {
   };
 
   return (
+    <>
+    <div className='flex justify-between'>
     <div className="profile-image-uploader">
       {image && (
         <div>
@@ -63,6 +73,12 @@ const ProfileImageUploader = ({user,  onUpdate }) => {
       )}
       <input type="file" accept="image/*" onChange={handleImageChange} />
     </div>
+    <div className='cursor-pointer' onClick={openModal}>
+    <Icon icon="bi:three-dots-vertical" />
+    </div>
+    </div>
+    <CreateGroupModal isOpen ={modalIsOpen} toggle={openModal}/>
+    </>
   );
 };
 

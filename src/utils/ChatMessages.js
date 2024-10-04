@@ -3,34 +3,30 @@ import { format, isToday, isYesterday, isThisWeek } from "date-fns";
 import socket from "../services/socket";
 import { getStatusIcon } from "../utils/messageUtils";
 
-const ChatMessages = ({ messages, user, selectedUser }) => {
+const ChatMessages = ({ messages, user, isGroupChat, selectedUser, selectedGroup  }) => {
   const [editingMessageId, setEditingMessageId] = useState(null);
   const [editContent, setEditContent] = useState("");
   const [editableMessages, setEditableMessages] = useState({});
   const editTimeLimit = 15 * 60 * 1000; // 15 minutes in milliseconds
 
   useEffect(() => {
-    // Check and update editable status for each message initially
     const initialEditableMessages = {};
     messages.forEach((msg) => {
       initialEditableMessages[msg._id] = isMessageEditable(msg.createdAt);
     });
     setEditableMessages(initialEditableMessages);
 
-    // Set an interval to check every 30 seconds for messages that may become uneditable
     const intervalId = setInterval(() => {
       const updatedEditableMessages = {};
       messages.forEach((msg) => {
         updatedEditableMessages[msg._id] = isMessageEditable(msg.createdAt);
       });
       setEditableMessages(updatedEditableMessages);
-    }, 30000); // Check every 30 seconds
+    }, 30000);
 
-    // Clean up the interval on component unmount
     return () => clearInterval(intervalId);
   }, [messages]);
 
-  // Function to check if the message is still editable
   const isMessageEditable = (createdAt) => {
     const now = new Date();
     const messageTime = new Date(createdAt);
@@ -40,8 +36,6 @@ const ChatMessages = ({ messages, user, selectedUser }) => {
 
   const handleEditMessage = (messageId) => {
     const messageToEdit = messages.find((msg) => msg._id === messageId);
-
-    // Check if the message is still editable
     if (isMessageEditable(messageToEdit.createdAt)) {
       setEditingMessageId(messageId);
       setEditContent(messageToEdit.content);
@@ -56,7 +50,8 @@ const ChatMessages = ({ messages, user, selectedUser }) => {
         _id: editingMessageId,
         content: editContent,
         sender: user.id,
-        receiver: selectedUser._id,
+        receiver: isGroupChat ? null : messages.find(m => m._id === editingMessageId).receiver,
+        group: isGroupChat ? messages.find(m => m._id === editingMessageId).group : null
       };
       socket.emit("messageEdited", updatedMessage);
       setEditingMessageId(null);
@@ -68,16 +63,23 @@ const ChatMessages = ({ messages, user, selectedUser }) => {
     const groupedMessages = [];
     let currentDate = null;
 
-    messages.forEach((message, index) => {
+    const filteredMessages = messages.filter(msg => 
+      isGroupChat 
+        ? msg.group === selectedGroup?._id
+        : (msg.sender === user?.id && msg.receiver === selectedUser?._id) ||
+          (msg.receiver === user?.id && msg.sender === selectedUser?._id)
+    );
+
+    filteredMessages.forEach((message, index) => {
       const messageDate = new Date(message.createdAt);
-      let formattedDate = format(messageDate, "MMMM d, yyyy"); // Default format
+      let formattedDate = format(messageDate, "MMMM d, yyyy");
 
       if (isToday(messageDate)) {
         formattedDate = "Today";
       } else if (isYesterday(messageDate)) {
         formattedDate = "Yesterday";
       } else if (isThisWeek(messageDate)) {
-        formattedDate = format(messageDate, "EEEE"); // Display weekday name (e.g., "Monday")
+        formattedDate = format(messageDate, "EEEE");
       }
 
       if (formattedDate !== currentDate) {
@@ -103,14 +105,13 @@ const ChatMessages = ({ messages, user, selectedUser }) => {
         );
       } else {
         const msg = item.message;
-        const canEdit = editableMessages[msg._id]; 
+        const canEdit = editableMessages[msg._id];
+        const isUserMessage = msg.sender === user?.id;
 
         return (
           <div
             key={`msg-${msg._id}`}
-            className={`message ${
-              msg.sender === user?.id ? "message-sent" : "message-received"
-            }`}
+            className={`message ${isUserMessage ? "message-sent" : "message-received"}`}
           >
             {editingMessageId === msg._id ? (
               <div className="edit-message">
@@ -125,13 +126,16 @@ const ChatMessages = ({ messages, user, selectedUser }) => {
             ) : (
               <>
                 <div className="message-content">
+                  {isGroupChat && !isUserMessage && (
+                    <span className="sender-name">{msg.senderName}: </span>
+                  )}
                   <p>{msg.content}</p>
                   <span className="message-timestamp">
                     {format(new Date(msg.createdAt), "hh:mm a")}
-                    {msg.sender === user?.id && getStatusIcon(msg.status)}
+                    {isUserMessage && getStatusIcon(msg.status)}
                     {msg.isEdited && " (edited)"}
                   </span>
-                  {msg.sender === user?.id && canEdit && (
+                  {isUserMessage && canEdit && (
                     <button onClick={() => handleEditMessage(msg._id)}>
                       Edit
                     </button>
