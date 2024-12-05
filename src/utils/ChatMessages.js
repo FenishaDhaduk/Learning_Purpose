@@ -29,7 +29,6 @@ const ChatMessages = ({ messages, user, isGroupChat, selectedUser, selectedGroup
 
   }, [messages]);
   useEffect(() => {
-    console.log("callmessage...")
     socket.on('newGroupMessage', (message) => {
       setMessages((prev) => {
         if (!prev.some(msg => msg._id === message._id)) {
@@ -144,7 +143,7 @@ const ChatMessages = ({ messages, user, isGroupChat, selectedUser, selectedGroup
       } else {
         const msg = item.message;
         const canEdit = editableMessages[msg._id];
-        const isUserMessage = msg.sender._id === user?.id;
+        const isUserMessage = msg.sender._id === user?.id || msg?.sender == user?.id;
 
         return (
           <div
