@@ -1,22 +1,32 @@
 import Group from '../models/Group.js';
-
+import User from '../models/User.js';
 
 export const createGroup = async (req, res) => {
   try {
     const { name, members } = req.body;
 
+    // Create the group
     const group = new Group({
       name,
       members: [...members, req.user.id], // Include creator in members list
       admins: [req.user.id], // The creator becomes the first admin
     });
 
+    // Save the group
     await group.save();
+
+    // Update the users' 'groups' field by adding this new group to each member
+    await User.updateMany(
+      { _id: { $in: [...members, req.user.id] } }, // Update all members including the creator
+      { $push: { groups: group._id } } // Push the group ID to the users' 'groups' array
+    );
+
     res.status(201).json({ message: 'Group created successfully', data: group });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
 
 
 export const manageMembers = async (req, res) => {

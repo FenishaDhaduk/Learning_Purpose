@@ -10,6 +10,7 @@ import messageRoutes from './routes/messageRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import groupRoutes from './routes/groupRoutes.js';
 import socketHandler from './sockets/socketHandler.js';
+import chatRoutes from './routes/chatRoutes.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -19,18 +20,17 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*', // Allow requests from all origins (change this to specific origins for security)
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed HTTP methods
-    allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
-    credentials: true, // Allow credentials such as cookies, authorization headers, etc.
+    origin: '*', 
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+    allowedHeaders: ['Content-Type', 'Authorization'], 
+    credentials: true, 
   },
 });
 
 connectDB();
 
-// Use CORS middleware with specific options
 app.use(cors({
-  origin: '*', // Adjust this to allow requests from specific origins, e.g., 'http://localhost:3000'
+  origin: '*', 
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
@@ -44,6 +44,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/group', groupRoutes);
+app.use('/api',chatRoutes)
 app.use('/uploads/profileImages', express.static(path.join(__dirname, 'uploads/profileImages')));
 
 socketHandler(io);

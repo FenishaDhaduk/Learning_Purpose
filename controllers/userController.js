@@ -6,12 +6,24 @@ import { fileURLToPath } from 'url';
 
 export const getUsers = async (req, res) => {
   try {
-    const users = await User.find().select('-password'); // Exclude password from user data
+    const users = await User.find()
+      .select('-password') // Exclude the password field
+      .populate({
+        path: 'groups',
+        select: 'name members admins',
+        populate: [
+          { path: 'members', select: 'username profileImage' },
+          { path: 'admins', select: 'username profileImage' }
+        ]
+      });
+
     res.json(users);
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+
 
 export const updateProfileImage = async (req, res) => {
   try {

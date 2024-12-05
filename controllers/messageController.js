@@ -1,3 +1,4 @@
+import Group from '../models/Group.js';
 import Message from '../models/Message.js';
 
 export const sendMessage = async (req, res) => {
@@ -16,31 +17,53 @@ export const sendMessage = async (req, res) => {
 
     const message = new Message({ sender, receiver, content, group });
     await message.save();
+    console.log(message)
 
     res.status(201).json({ message: 'Message sent successfully', data: message });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+
 export const getMessages = async (req, res) => {
   try {
-    const { userId, receiverId } = req.query;
-    const messages = await Message.find({
-      $or: [
-        { sender: userId, receiver: receiverId },
-        { sender: receiverId, receiver: userId }
-      ]
-    }).sort({ createdAt: 1 });
-    res.json(messages);
+    const { userId, receiverId, groupId } = req.query;
+
+    let messages;
+    if (groupId) {
+      // Fetch group messages
+      const group = await Group.findById(groupId);
+      if (!group) {
+        return res.status(404).json({ error: 'Group not found' });
+      }
+      messages = await Message.find({ group: groupId })
+        .populate('sender', 'username profileImage')
+        .populate('seenBy', 'username')
+        .sort({ createdAt: 1 });
+
+      // Respond with group name and messages
+      res.json({ groupName: group?.name, messages });
+    } else {
+      // Fetch individual messages
+       messages = await Message.find({
+        $or: [
+          { sender: userId, receiver: receiverId },
+          { sender: receiverId, receiver: userId }
+        ]
+      }).sort({ createdAt: 1 });
+      res.json(messages);
+    }
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
   }
 };
 
+
 export const editMessage = async (req, res) => {
   try {
     const { messageId, newContent } = req.body;
-    const userId = req.user.id; // Assuming you have user info in the request after authentication
+    const userId = req.user.id; 
 
     const message = await Message.findById(messageId);
 
