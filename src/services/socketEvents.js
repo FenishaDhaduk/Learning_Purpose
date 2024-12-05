@@ -23,9 +23,7 @@ export const setupSocketListeners = (
 
   socket.on('newMessage', (message) => {
     setMessages((prev) => {
-      // Check if the message is already in the array to avoid duplicates
       if (!prev.some(msg => msg._id === message._id)) {
-        // Only add the message if it's relevant to the current chat
         if (
           (message.sender === user?.id && message.receiver === selectedChat?._id) ||
           (message.receiver === user?.id && message.sender === selectedChat?._id) ||
@@ -42,11 +40,10 @@ export const setupSocketListeners = (
     }
   });
 
+
   socket.on('newGroupMessage', (message) => {
     setMessages((prev) => {
-      // Check if the message is already in the array to avoid duplicates
       if (!prev.some(msg => msg._id === message._id)) {
-        // Only add the message if it's for the current group
         if (message.group === selectedChat?._id) {
           return [...prev, message];
         }
@@ -54,6 +51,7 @@ export const setupSocketListeners = (
       return prev;
     });
   });
+  
 
   socket.on('messageStatusUpdate', ({ messageId, status, seenBy }) => {
     setMessages((prev) =>
@@ -108,22 +106,18 @@ export const setupSocketListeners = (
     });
   });
 
-  // Function to emit 'messageSeen' event
   const emitMessageSeen = (messageId, groupId = null) => {
     socket.emit('messageSeen', { messageId, seenBy: user?.id, groupId });
   };
 
-  // Function to emit 'typing' event
   const emitTyping = (receiverId, groupId = null) => {
     socket.emit('typing', { senderId: user?.id, receiverId, groupId });
   };
 
-  // Function to emit 'stopTyping' event
   const emitStopTyping = (receiverId, groupId = null) => {
     socket.emit('stopTyping', { senderId: user?.id, receiverId, groupId });
   };
 
-  // Function to send a message
   const sendMessage = (content, receiverId, groupId = null) => {
     const messageData = {
       senderId: user?.id,
@@ -131,9 +125,9 @@ export const setupSocketListeners = (
       ...(groupId ? { groupId } : { receiverId }),
     };
     socket.emit('sendMessage', messageData);
+    setMessages((prevMessages) => [...prevMessages, messageData]);
   };
 
-  // Function to edit a message
   const editMessage = (messageId, newContent, groupId = null) => {
     const editData = {
       messageId,

@@ -73,6 +73,9 @@ const ChatWindow = ({ selectedUser, selectedGroup }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+
+  
+
   const handleScroll = () => {
     const scrollPosition = messagesEndRef.current.parentNode.scrollTop;
     const dateHeaders = Array.from(document.querySelectorAll('.date-header'));
@@ -103,6 +106,7 @@ const ChatWindow = ({ selectedUser, selectedGroup }) => {
           isGroupChat={isGroupChat}
           selectedUser={selectedUser}
           selectedGroup={selectedGroup}
+          setMessages={setMessages}
         />
         <div ref={messagesEndRef} />
       </div>
